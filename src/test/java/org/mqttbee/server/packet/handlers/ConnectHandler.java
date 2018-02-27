@@ -4,17 +4,24 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
+import org.mqttbee.api.mqtt.mqtt5.message.Mqtt5MessageType;
+
+import java.util.logging.Logger;
 
 /**
  * @author Christian Hoff
  */
 public class ConnectHandler extends ChannelInboundHandlerAdapter {
+    private final static Logger logger = Logger.getLogger(ConnectHandler.class.getName());
+
     @Override
     public void channelRead(final ChannelHandlerContext ctx, final Object msg) {
         boolean release = true;
         try {
             final ByteBuf byteBuf = (ByteBuf) msg;
-            if (byteBuf.readByte() == 0b0001_0000) {
+            final short fixedHeaderByte1 = byteBuf.readUnsignedByte();
+            if (PacketHandlerUtil.isMessageType(fixedHeaderByte1, Mqtt5MessageType.CONNECT)) {
+                logger.info("recv Connect");
                 final ByteBuf connAck = ctx.alloc().ioBuffer();
                 final byte[] encodedConnAck = {
                         // fixed header
@@ -30,6 +37,7 @@ public class ConnectHandler extends ChannelInboundHandlerAdapter {
                         //   property length
                         0
                 };
+                logger.info("send ConnAck");
                 connAck.writeBytes(encodedConnAck);
                 ctx.writeAndFlush(connAck);
             } else {
