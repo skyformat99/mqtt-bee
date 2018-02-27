@@ -10,12 +10,15 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LoggingHandler;
 import org.mqttbee.server.packet.handlers.ConnectHandler;
 
+import java.util.logging.Logger;
+
 /**
  * @author Christian Hoff
  */
 public class TestServer {
+    private final static Logger logger = Logger.getLogger(TestServer.class.getName());
 
-    private int port;
+    private final int port;
 
     private TestServer(final int port) {
         this.port = port;
@@ -52,6 +55,7 @@ public class TestServer {
         } else {
             port = 1883;
         }
+        logger.info(String.format("running MQTT server on port %d", port));
         new TestServer(port).run();
     }
 
