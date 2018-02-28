@@ -11,8 +11,8 @@ import java.util.logging.Logger;
 /**
  * @author Christian Hoff
  */
-public class ConnectHandler extends ChannelInboundHandlerAdapter {
-    private final static Logger logger = Logger.getLogger(ConnectHandler.class.getName());
+public class PingReqHandler extends ChannelInboundHandlerAdapter {
+    private final static Logger logger = Logger.getLogger(PingReqHandler.class.getName());
 
     @Override
     public void channelRead(final ChannelHandlerContext ctx, final Object msg) {
@@ -21,26 +21,19 @@ public class ConnectHandler extends ChannelInboundHandlerAdapter {
             final ByteBuf byteBuf = (ByteBuf) msg;
 //            final short fixedHeaderByte1 = byteBuf.readUnsignedByte();
             final short fixedHeaderByte1 = byteBuf.getUnsignedByte(byteBuf.readerIndex());
-            if (PacketHandlerUtil.isMessageType(fixedHeaderByte1, Mqtt5MessageType.CONNECT)) {
-                logger.info("recv Connect");
-                final ByteBuf connAck = ctx.alloc().ioBuffer();
-                final byte[] encodedConnAck = {
+            if (PacketHandlerUtil.isMessageType(fixedHeaderByte1, Mqtt5MessageType.PINGREQ)) {
+                logger.info("recv PingReq");
+                final ByteBuf pingResp = ctx.alloc().ioBuffer();
+                final byte[] encodedPingResp = {
                         // fixed header
                         //   type, flags
-                        0b0010_0000,
+                        (byte) 0b1101_0000,
                         //   remaining length
-                        3,
-                        // variable header
-                        //   connack flags
-                        0b0000_0000,
-                        //   reason code (success)
-                        0x00,
-                        //   property length
                         0
                 };
-                logger.info("send ConnAck");
-                connAck.writeBytes(encodedConnAck);
-                ctx.writeAndFlush(connAck);
+                logger.info("send PingResp");
+                pingResp.writeBytes(encodedPingResp);
+                ctx.writeAndFlush(pingResp);
             } else {
                 release = false;
                 ctx.fireChannelRead(msg);

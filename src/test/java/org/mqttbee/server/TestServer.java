@@ -9,6 +9,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LoggingHandler;
 import org.mqttbee.server.packet.handlers.ConnectHandler;
+import org.mqttbee.server.packet.handlers.PingReqHandler;
 
 import java.util.logging.Logger;
 
@@ -36,6 +37,7 @@ public class TestServer {
                         @Override
                         protected void initChannel(final SocketChannel ch) {
                             ch.pipeline().addLast(new ConnectHandler());
+                            ch.pipeline().addLast(new PingReqHandler());
                         }
                     });
 
