@@ -27,6 +27,7 @@ import org.mqttbee.mqtt.MqttVersion;
 import org.mqttbee.mqtt.advanced.MqttAdvancedClientData;
 import org.mqttbee.mqtt.datatypes.MqttClientIdentifierImpl;
 import org.mqttbee.mqtt5.Mqtt5ClientImpl;
+import org.mqttbee.mqtt5.Mqtt5ClientRxImpl;
 import org.mqttbee.util.MustNotBeImplementedUtil;
 
 /**
@@ -78,8 +79,13 @@ public class Mqtt5ClientBuilder {
     }
 
     @NotNull
-    public Mqtt5Client reactive() {
-        return new Mqtt5ClientImpl(buildClientData());
+    public Mqtt5Client simple() {
+        return new Mqtt5ClientImpl(new Mqtt5ClientRxImpl(buildClientData()));
+    }
+
+    @NotNull
+    public Mqtt5ClientRx reactive() {
+        return new Mqtt5ClientRxImpl(buildClientData());
     }
 
     private MqttClientData buildClientData() {

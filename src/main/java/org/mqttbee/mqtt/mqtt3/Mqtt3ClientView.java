@@ -36,7 +36,7 @@ import org.mqttbee.mqtt.message.publish.mqtt3.Mqtt3PublishResultView;
 import org.mqttbee.mqtt.message.publish.mqtt3.Mqtt3PublishView;
 import org.mqttbee.mqtt.message.subscribe.mqtt3.Mqtt3SubscribeView;
 import org.mqttbee.mqtt.message.unsubscribe.mqtt3.Mqtt3UnsubscribeView;
-import org.mqttbee.mqtt5.Mqtt5ClientImpl;
+import org.mqttbee.mqtt5.Mqtt5ClientRxImpl;
 import org.mqttbee.util.MustNotBeImplementedUtil;
 
 /**
@@ -44,9 +44,9 @@ import org.mqttbee.util.MustNotBeImplementedUtil;
  */
 public class Mqtt3ClientView implements Mqtt3Client {
 
-    private final Mqtt5ClientImpl wrapped;
+    private final Mqtt5ClientRxImpl wrapped;
 
-    public Mqtt3ClientView(@NotNull final Mqtt5ClientImpl wrapped) {
+    public Mqtt3ClientView(@NotNull final Mqtt5ClientRxImpl wrapped) {
         this.wrapped = wrapped;
     }
 

@@ -17,199 +17,62 @@
 
 package org.mqttbee.mqtt5;
 
-import io.netty.bootstrap.Bootstrap;
-import io.reactivex.Completable;
+import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
-import io.reactivex.Single;
 import org.mqttbee.annotations.NotNull;
-import org.mqttbee.api.mqtt.exceptions.AlreadyConnectedException;
-import org.mqttbee.api.mqtt.exceptions.NotConnectedException;
-import org.mqttbee.api.mqtt.mqtt5.Mqtt5Client;
+import org.mqttbee.api.mqtt.mqtt5.*;
 import org.mqttbee.api.mqtt.mqtt5.message.connect.Mqtt5Connect;
 import org.mqttbee.api.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAck;
-import org.mqttbee.api.mqtt.mqtt5.message.disconnect.Mqtt5Disconnect;
 import org.mqttbee.api.mqtt.mqtt5.message.publish.Mqtt5Publish;
-import org.mqttbee.api.mqtt.mqtt5.message.publish.Mqtt5PublishResult;
 import org.mqttbee.api.mqtt.mqtt5.message.subscribe.Mqtt5Subscribe;
 import org.mqttbee.api.mqtt.mqtt5.message.subscribe.Mqtt5SubscribeResult;
 import org.mqttbee.api.mqtt.mqtt5.message.subscribe.suback.Mqtt5SubAck;
-import org.mqttbee.api.mqtt.mqtt5.message.unsubscribe.Mqtt5Unsubscribe;
-import org.mqttbee.api.mqtt.mqtt5.message.unsubscribe.unsuback.Mqtt5UnsubAck;
-import org.mqttbee.mqtt.MqttClientConnectionData;
-import org.mqttbee.mqtt.MqttClientData;
-import org.mqttbee.mqtt.message.connect.MqttConnect;
-import org.mqttbee.mqtt.message.disconnect.MqttDisconnect;
-import org.mqttbee.mqtt.message.publish.MqttPublish;
-import org.mqttbee.mqtt.message.subscribe.MqttSubscribe;
-import org.mqttbee.mqtt.message.unsubscribe.MqttUnsubscribe;
-import org.mqttbee.mqtt5.handler.auth.Mqtt5ReAuthEvent;
-import org.mqttbee.mqtt5.handler.disconnect.MqttDisconnectUtil;
-import org.mqttbee.mqtt5.handler.publish.MqttGlobalIncomingPublishFlow;
-import org.mqttbee.mqtt5.handler.publish.MqttGlobalIncomingPublishFlowable;
-import org.mqttbee.mqtt5.handler.publish.MqttIncomingAckFlowable;
-import org.mqttbee.mqtt5.handler.publish.MqttSubscriptionFlowable;
-import org.mqttbee.mqtt5.handler.subscribe.MqttSubscriptionHandler;
-import org.mqttbee.mqtt5.handler.subscribe.MqttUnsubscribeWithFlow;
-import org.mqttbee.mqtt5.ioc.ChannelComponent;
-import org.mqttbee.mqtt5.ioc.MqttBeeComponent;
 import org.mqttbee.rx.FlowableWithSingle;
-import org.mqttbee.util.MustNotBeImplementedUtil;
 
-/**
- * @author Silvio Giebl
- */
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 public class Mqtt5ClientImpl implements Mqtt5Client {
+    private Mqtt5ClientRx mqttClientRx;
 
-    private final MqttClientData clientData;
-
-    public Mqtt5ClientImpl(@NotNull final MqttClientData clientData) {
-        this.clientData = clientData;
+    public Mqtt5ClientImpl(@NotNull final Mqtt5ClientRx mqttClientRx) {
+        this.mqttClientRx = mqttClientRx;
     }
 
-    @NotNull
     @Override
-    public Single<Mqtt5ConnAck> connect(@NotNull final Mqtt5Connect connect) {
-        final MqttConnect mqttConnect = MustNotBeImplementedUtil.checkNotImplemented(connect, MqttConnect.class);
-
-        return Single.<Mqtt5ConnAck>create(connAckEmitter -> {
-            if (!clientData.setConnecting(true)) {
-                connAckEmitter.onError(new AlreadyConnectedException(true));
-                return;
-            }
-            if (clientData.isConnected()) {
-                clientData.setConnecting(false);
-                connAckEmitter.onError(new AlreadyConnectedException(false));
-                return;
-            }
-
-            final Bootstrap bootstrap =
-                    MqttBeeComponent.INSTANCE.nettyBootstrap().bootstrap(clientData.getExecutorConfig());
-
-            bootstrap.handler(MqttBeeComponent.INSTANCE.channelInitializerProvider()
-                    .get(mqttConnect, connAckEmitter, clientData));
-
-            bootstrap.connect(clientData.getServerHost(), clientData.getServerPort()).addListener(future -> {
-                if (!future.isSuccess()) {
-                    connAckEmitter.onError(future.cause());
-                }
-            });
-        }).doOnSuccess(connAck -> {
-            clientData.setConnected(true);
-            clientData.setConnecting(false);
-
-            final MqttClientConnectionData clientConnectionData = clientData.getRawClientConnectionData();
-            assert clientConnectionData != null;
-            clientConnectionData.getChannel().closeFuture().addListener(future -> {
-                MqttBeeComponent.INSTANCE.nettyBootstrap().free(clientData.getExecutorConfig());
-                clientData.setClientConnectionData(null);
-                clientData.setServerConnectionData(null);
-                clientData.setConnected(false);
-            });
-        }).doOnError(throwable -> {
-            if (!(throwable instanceof AlreadyConnectedException)) {
-                MqttBeeComponent.INSTANCE.nettyBootstrap().free(clientData.getExecutorConfig());
-                clientData.setClientConnectionData(null);
-                clientData.setServerConnectionData(null);
-                clientData.setConnecting(false);
-            }
-        }).observeOn(clientData.getExecutorConfig().getRxJavaScheduler());
+    public ConnectFuture connect(@NotNull final Mqtt5Connect connect) {
+        final ConnectFuture future = new ConnectFuture();
+        mqttClientRx.connect(connect).doOnSuccess(connack -> future.complete(connack));
+        return future;
     }
 
-    @NotNull
     @Override
-    public FlowableWithSingle<Mqtt5SubscribeResult, Mqtt5SubAck, Mqtt5Publish> subscribe(
-            @NotNull final Mqtt5Subscribe subscribe) {
-
-        final MqttSubscribe mqttSubscribe =
-                MustNotBeImplementedUtil.checkNotImplemented(subscribe, MqttSubscribe.class);
-
-        final Flowable<Mqtt5SubscribeResult> subscriptionFlowable =
-                new MqttSubscriptionFlowable(mqttSubscribe, clientData).observeOn(
-                        clientData.getExecutorConfig().getRxJavaScheduler());
-        return new FlowableWithSingle<>(subscriptionFlowable, Mqtt5SubAck.class, Mqtt5Publish.class);
+    public Publications subscribe(@NotNull final Mqtt5Subscribe subscribe) {
+        final FlowableWithSingle<Mqtt5SubscribeResult, Mqtt5SubAck, Mqtt5Publish> subscribeFlowable =
+                mqttClientRx.subscribe(subscribe);
+        return new Publications(subscribeFlowable);
     }
 
-    @NotNull
     @Override
-    public Flowable<Mqtt5Publish> remainingPublishes() {
-        return new MqttGlobalIncomingPublishFlowable(MqttGlobalIncomingPublishFlow.TYPE_REMAINING_PUBLISHES, clientData)
-                .cast(Mqtt5Publish.class)
-                .observeOn(clientData.getExecutorConfig().getRxJavaScheduler()); // TODO temp
+    public PublishFuture publish(@NotNull final Mqtt5Publish mqtt5Publish) {
+        // how to init the stream without having to create a flowable on each publish?
+        final Flowable<Mqtt5Publish> publishFlowable = Flowable.create(emitter -> {
+        }, BackpressureStrategy.MISSING);
+        mqttClientRx.publish(publishFlowable);
+        final PublishFuture publishFuture = new PublishFuture();
+        return publishFuture;
     }
 
-    @NotNull
     @Override
-    public Flowable<Mqtt5Publish> allPublishes() {
-        return new MqttGlobalIncomingPublishFlowable(MqttGlobalIncomingPublishFlow.TYPE_ALL_PUBLISHES, clientData).cast(
-                Mqtt5Publish.class).observeOn(clientData.getExecutorConfig().getRxJavaScheduler()); // TODO temp
+    public Mqtt5ConnAck connectAndWait(
+            @NotNull final Mqtt5Connect connect) throws InterruptedException, ExecutionException {
+        return connect(connect).get();
     }
 
-    @NotNull
     @Override
-    public Single<Mqtt5UnsubAck> unsubscribe(@NotNull final Mqtt5Unsubscribe unsubscribe) {
-        final MqttUnsubscribe mqttUnsubscribe =
-                MustNotBeImplementedUtil.checkNotImplemented(unsubscribe, MqttUnsubscribe.class);
-
-        return Single.<Mqtt5UnsubAck>create(emitter -> {
-            final MqttClientConnectionData clientConnectionData = clientData.getRawClientConnectionData();
-            if (clientConnectionData == null) {
-                emitter.onError(new NotConnectedException());
-            } else {
-                final ChannelComponent channelComponent = ChannelComponent.get(clientConnectionData.getChannel());
-                final MqttSubscriptionHandler subscriptionHandler = channelComponent.subscriptionHandler();
-                subscriptionHandler.unsubscribe(new MqttUnsubscribeWithFlow(mqttUnsubscribe, emitter));
-            }
-        }).observeOn(clientData.getExecutorConfig().getRxJavaScheduler());
+    public Mqtt5ConnAck connectAndWait(@NotNull final Mqtt5Connect connect, @NotNull final int timeout, @NotNull final TimeUnit timeUnit)
+            throws InterruptedException, ExecutionException, TimeoutException {
+        return connect(connect).get(timeout, timeUnit);
     }
-
-    @NotNull
-    @Override
-    public Flowable<Mqtt5PublishResult> publish(@NotNull final Flowable<Mqtt5Publish> publishFlowable) {
-        return new MqttIncomingAckFlowable(
-                publishFlowable.map(
-                        publish -> MustNotBeImplementedUtil.checkNotImplemented(publish, MqttPublish.class)),
-                clientData).observeOn(clientData.getExecutorConfig().getRxJavaScheduler());
-    }
-
-    @NotNull
-    @Override
-    public Completable reauth() {
-        return Completable.create(emitter -> {
-            final MqttClientConnectionData clientConnectionData = clientData.getRawClientConnectionData();
-            if (clientConnectionData != null) {
-                clientConnectionData.getChannel().pipeline().fireUserEventTriggered(new Mqtt5ReAuthEvent(emitter));
-            } else {
-                emitter.onError(new NotConnectedException());
-            }
-        }).observeOn(clientData.getExecutorConfig().getRxJavaScheduler());
-    }
-
-    @NotNull
-    @Override
-    public Completable disconnect(@NotNull final Mqtt5Disconnect disconnect) {
-        final MqttDisconnect mqttDisconnect =
-                MustNotBeImplementedUtil.checkNotImplemented(disconnect, MqttDisconnect.class);
-
-        return Completable.create(emitter -> {
-            final MqttClientConnectionData clientConnectionData = clientData.getRawClientConnectionData();
-            if (clientConnectionData != null) {
-                MqttDisconnectUtil.disconnect(clientConnectionData.getChannel(), mqttDisconnect).addListener(future -> {
-                    if (future.isSuccess()) {
-                        emitter.onComplete();
-                    } else {
-                        emitter.onError(future.cause());
-                    }
-                });
-            } else {
-                emitter.onError(new NotConnectedException());
-            }
-        }).observeOn(clientData.getExecutorConfig().getRxJavaScheduler());
-    }
-
-    @NotNull
-    @Override
-    public MqttClientData getClientData() {
-        return clientData;
-    }
-
 }

@@ -23,7 +23,7 @@ import org.mqttbee.mqtt.MqttClientExecutorConfigImpl;
 import org.mqttbee.mqtt.MqttVersion;
 import org.mqttbee.mqtt.datatypes.MqttClientIdentifierImpl;
 import org.mqttbee.mqtt.mqtt3.Mqtt3ClientView;
-import org.mqttbee.mqtt5.Mqtt5ClientImpl;
+import org.mqttbee.mqtt5.Mqtt5ClientRxImpl;
 
 /**
  * @author Silvio Giebl
@@ -49,7 +49,7 @@ public class Mqtt3ClientBuilder {
 
     @NotNull
     public Mqtt3Client reactive() {
-        return new Mqtt3ClientView(new Mqtt5ClientImpl(buildClientData()));
+        return new Mqtt3ClientView(new Mqtt5ClientRxImpl(buildClientData()));
     }
 
     private MqttClientData buildClientData() {
