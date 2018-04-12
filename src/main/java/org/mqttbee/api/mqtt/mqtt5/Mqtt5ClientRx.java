@@ -20,6 +20,7 @@ import io.reactivex.Flowable;
 import io.reactivex.Single;
 import org.mqttbee.annotations.NotNull;
 import org.mqttbee.api.mqtt.MqttClient;
+import org.mqttbee.api.mqtt.mqtt5.datatypes.Mqtt5UserProperty;
 import org.mqttbee.api.mqtt.mqtt5.message.connect.Mqtt5Connect;
 import org.mqttbee.api.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAck;
 import org.mqttbee.api.mqtt.mqtt5.message.disconnect.Mqtt5Disconnect;
@@ -27,6 +28,7 @@ import org.mqttbee.api.mqtt.mqtt5.message.publish.Mqtt5Publish;
 import org.mqttbee.api.mqtt.mqtt5.message.publish.Mqtt5PublishResult;
 import org.mqttbee.api.mqtt.mqtt5.message.subscribe.Mqtt5Subscribe;
 import org.mqttbee.api.mqtt.mqtt5.message.subscribe.Mqtt5SubscribeResult;
+import org.mqttbee.api.mqtt.mqtt5.message.subscribe.Mqtt5Subscription;
 import org.mqttbee.api.mqtt.mqtt5.message.subscribe.suback.Mqtt5SubAck;
 import org.mqttbee.api.mqtt.mqtt5.message.unsubscribe.Mqtt5Unsubscribe;
 import org.mqttbee.api.mqtt.mqtt5.message.unsubscribe.unsuback.Mqtt5UnsubAck;
@@ -42,6 +44,9 @@ public interface Mqtt5ClientRx extends MqttClient {
 
     @NotNull
     FlowableWithSingle<Mqtt5SubscribeResult, Mqtt5SubAck, Mqtt5Publish> subscribe(@NotNull Mqtt5Subscribe subscribe);
+
+    @NotNull
+    FlowableWithSingle<Mqtt5SubscribeResult,Mqtt5SubAck,Mqtt5Publish> subscribe(Mqtt5Subscription subscription, Mqtt5UserProperty... userProperties);
 
     @NotNull
     Flowable<Mqtt5Publish> remainingPublishes();

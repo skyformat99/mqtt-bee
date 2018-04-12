@@ -64,6 +64,10 @@ public class MqttClientBuilderTest {
                         (suback, sub) -> System.out.println("received suback" + suback + " for subscription " + sub))
                 .doOnEach(publication -> System.out.println("received publication " + publication));
 
+        mqtt5ClientRx.subscribe(subscription)
+                .doOnSingle(
+                        (suback, sub) -> System.out.println("received suback" + suback + " for subscription 2 " + sub))
+                .doOnEach(publication -> System.out.println("received publication " + publication));
 
         byte[] payload = {1, 2, 3};
         String topic = "mytopic";

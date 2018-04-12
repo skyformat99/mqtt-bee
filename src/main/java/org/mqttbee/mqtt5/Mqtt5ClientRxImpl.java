@@ -25,6 +25,8 @@ import org.mqttbee.annotations.NotNull;
 import org.mqttbee.api.mqtt.exceptions.AlreadyConnectedException;
 import org.mqttbee.api.mqtt.exceptions.NotConnectedException;
 import org.mqttbee.api.mqtt.mqtt5.Mqtt5ClientRx;
+import org.mqttbee.api.mqtt.mqtt5.datatypes.Mqtt5UserProperties;
+import org.mqttbee.api.mqtt.mqtt5.datatypes.Mqtt5UserProperty;
 import org.mqttbee.api.mqtt.mqtt5.message.connect.Mqtt5Connect;
 import org.mqttbee.api.mqtt.mqtt5.message.connect.connack.Mqtt5ConnAck;
 import org.mqttbee.api.mqtt.mqtt5.message.disconnect.Mqtt5Disconnect;
@@ -32,6 +34,7 @@ import org.mqttbee.api.mqtt.mqtt5.message.publish.Mqtt5Publish;
 import org.mqttbee.api.mqtt.mqtt5.message.publish.Mqtt5PublishResult;
 import org.mqttbee.api.mqtt.mqtt5.message.subscribe.Mqtt5Subscribe;
 import org.mqttbee.api.mqtt.mqtt5.message.subscribe.Mqtt5SubscribeResult;
+import org.mqttbee.api.mqtt.mqtt5.message.subscribe.Mqtt5Subscription;
 import org.mqttbee.api.mqtt.mqtt5.message.subscribe.suback.Mqtt5SubAck;
 import org.mqttbee.api.mqtt.mqtt5.message.unsubscribe.Mqtt5Unsubscribe;
 import org.mqttbee.api.mqtt.mqtt5.message.unsubscribe.unsuback.Mqtt5UnsubAck;
@@ -131,6 +134,17 @@ public class Mqtt5ClientRxImpl implements Mqtt5ClientRx {
 
     @NotNull
     @Override
+    public FlowableWithSingle<Mqtt5SubscribeResult, Mqtt5SubAck, Mqtt5Publish> subscribe(
+            Mqtt5Subscription subscription, Mqtt5UserProperty... userProperties) {
+        Mqtt5Subscribe subscribe = Mqtt5Subscribe.builder()
+                .withUserProperties(Mqtt5UserProperties.of(userProperties))
+                .addSubscription(subscription)
+                .build();
+        return subscribe(subscribe);
+    }
+
+    @NotNull
+    @Override
     public Flowable<Mqtt5Publish> remainingPublishes() {
         return new MqttGlobalIncomingPublishFlowable(MqttGlobalIncomingPublishFlow.TYPE_REMAINING_PUBLISHES, clientData)
                 .cast(Mqtt5Publish.class)
@@ -211,5 +225,6 @@ public class Mqtt5ClientRxImpl implements Mqtt5ClientRx {
     public MqttClientData getClientData() {
         return clientData;
     }
+
 
 }
