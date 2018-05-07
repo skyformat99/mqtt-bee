@@ -24,11 +24,11 @@ import org.mqttbee.api.mqtt.mqtt5.message.subscribe.suback.Mqtt5SubAckReasonCode
 import org.mqttbee.mqtt.MqttClientConnectionData;
 import org.mqttbee.mqtt.MqttClientData;
 import org.mqttbee.mqtt.datatypes.MqttTopicFilterImpl;
+import org.mqttbee.mqtt.ioc.ChannelScope;
 import org.mqttbee.mqtt.message.publish.MqttPublishWrapper;
 import org.mqttbee.mqtt.message.subscribe.MqttSubscribeWrapper;
 import org.mqttbee.mqtt.message.subscribe.MqttSubscription;
 import org.mqttbee.mqtt.message.subscribe.suback.MqttSubAck;
-import org.mqttbee.mqtt.ioc.ChannelScope;
 import org.mqttbee.util.collections.IntMap;
 import org.mqttbee.util.collections.ScNodeList;
 
@@ -110,10 +110,9 @@ public class MqttIncomingPublishFlowsWithId extends MqttIncomingPublishFlows {
         }
     }
 
-    @NotNull
     @Override
-    public ScNodeList<MqttIncomingPublishFlow> findMatching(@NotNull final MqttPublishWrapper publish) {
-        final ScNodeList<MqttIncomingPublishFlow> matchingFlows = new ScNodeList<>();
+    void findMatching(
+        @NotNull final MqttPublishWrapper publish, @NotNull final ScNodeList<MqttIncomingPublishFlow> matchingFlows) {
 
         final ImmutableIntArray subscriptionIdentifiers = publish.getSubscriptionIdentifiers();
         if (!subscriptionIdentifiers.isEmpty()) {
@@ -125,10 +124,6 @@ public class MqttIncomingPublishFlowsWithId extends MqttIncomingPublishFlows {
                 }
             }
         }
-
         super.findMatching(publish, matchingFlows);
-
-        return matchingFlows;
     }
-
 }
