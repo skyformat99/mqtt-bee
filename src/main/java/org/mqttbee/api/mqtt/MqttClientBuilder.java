@@ -18,6 +18,7 @@
 package org.mqttbee.api.mqtt;
 
 import org.mqttbee.annotations.NotNull;
+import org.mqttbee.annotations.Nullable;
 import org.mqttbee.api.mqtt.datatypes.MqttClientIdentifier;
 import org.mqttbee.api.mqtt.mqtt3.Mqtt3ClientBuilder;
 import org.mqttbee.api.mqtt.mqtt5.Mqtt5ClientBuilder;
@@ -25,6 +26,8 @@ import org.mqttbee.mqtt.MqttClientExecutorConfigImpl;
 import org.mqttbee.mqtt.datatypes.MqttClientIdentifierImpl;
 import org.mqttbee.mqtt.util.MqttBuilderUtil;
 import org.mqttbee.util.MustNotBeImplementedUtil;
+
+import java.security.KeyStore;
 
 /**
  * @author Silvio Giebl
@@ -38,6 +41,9 @@ public class MqttClientBuilder {
     private boolean usesSSL;
     private boolean usesWebSockets = false;
     private MqttClientExecutorConfigImpl executorConfig = MqttClientExecutorConfigImpl.DEFAULT;
+    private KeyStore keyStore = null;
+    private String keyStorePassword = "";
+    private KeyStore trustStore = null;
 
     MqttClientBuilder() {
     }
@@ -79,6 +85,25 @@ public class MqttClientBuilder {
     }
 
     @NotNull
+    public MqttClientBuilder keyStore(@Nullable final KeyStore keyStore) {
+        this.keyStore = keyStore;
+        return this;
+    }
+
+    @NotNull
+    public MqttClientBuilder keyStorePassword(@NotNull final String keyStorePassword) {
+        this.keyStorePassword = keyStorePassword;
+        return this;
+    }
+
+
+    @NotNull
+    public MqttClientBuilder trustStore(@Nullable final KeyStore trustStore) {
+        this.trustStore = trustStore;
+        return this;
+    }
+
+    @NotNull
     public MqttClientBuilder usingWebSockets(final boolean usesWebSockets) {
         this.usesWebSockets = usesWebSockets;
         return this;
@@ -93,12 +118,11 @@ public class MqttClientBuilder {
 
     @NotNull
     public Mqtt3ClientBuilder usingMqtt3() {
-        return new Mqtt3ClientBuilder(identifier, serverHost, serverPort, serverPath, usesSSL, usesWebSockets, executorConfig);
+        return new Mqtt3ClientBuilder(identifier, serverHost, serverPort, serverPath, usesSSL, keyStore, keyStorePassword, trustStore, usesWebSockets, executorConfig);
     }
 
     @NotNull
     public Mqtt5ClientBuilder usingMqtt5() {
-        return new Mqtt5ClientBuilder(identifier, serverHost, serverPort, serverPath, usesSSL, usesWebSockets, executorConfig);
+        return new Mqtt5ClientBuilder(identifier, serverHost, serverPort, serverPath, usesSSL, keyStore, keyStorePassword, trustStore, usesWebSockets, executorConfig);
     }
-
 }

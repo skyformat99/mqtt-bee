@@ -18,12 +18,15 @@
 package org.mqttbee.api.mqtt.mqtt3;
 
 import org.mqttbee.annotations.NotNull;
+import org.mqttbee.annotations.Nullable;
 import org.mqttbee.mqtt.MqttClientData;
 import org.mqttbee.mqtt.MqttClientExecutorConfigImpl;
 import org.mqttbee.mqtt.MqttVersion;
 import org.mqttbee.mqtt.datatypes.MqttClientIdentifierImpl;
 import org.mqttbee.mqtt.mqtt3.Mqtt3ClientView;
 import org.mqttbee.mqtt5.Mqtt5ClientImpl;
+
+import java.security.KeyStore;
 
 /**
  * @author Silvio Giebl
@@ -34,19 +37,25 @@ public class Mqtt3ClientBuilder {
     private final String serverHost;
     private final int serverPort;
     private final String serverPath;
-    private final boolean usesSSL;
     private final MqttClientExecutorConfigImpl executorConfig;
     private final boolean usesWebSockets;
+    private final boolean usesSSL;
+    private final KeyStore keyStore;
+    private final String keyStorePassword;
+    private final KeyStore trustStore;
 
     public Mqtt3ClientBuilder(
             @NotNull final MqttClientIdentifierImpl identifier, @NotNull final String serverHost, final int serverPort,
-            final String serverPath, final boolean usesSSL, @NotNull boolean usesWebSockets, @NotNull final MqttClientExecutorConfigImpl executorConfig) {
-
+            final String serverPath, final boolean usesSSL, @Nullable final KeyStore keyStore, @NotNull final String keyStorePassword, @Nullable final KeyStore trustStore,
+            @NotNull boolean usesWebSockets, @NotNull final MqttClientExecutorConfigImpl executorConfig) {
         this.identifier = identifier;
         this.serverHost = serverHost;
         this.serverPort = serverPort;
         this.serverPath = serverPath;
         this.usesSSL = usesSSL;
+        this.keyStore = keyStore;
+        this.keyStorePassword = keyStorePassword;
+        this.trustStore = trustStore;
         this.usesWebSockets = usesWebSockets;
         this.executorConfig = executorConfig;
     }
@@ -57,7 +66,8 @@ public class Mqtt3ClientBuilder {
     }
 
     private MqttClientData buildClientData() {
-        return new MqttClientData(MqttVersion.MQTT_3_1_1, identifier, serverHost, serverPort, serverPath, usesSSL, usesWebSockets, false, false,
+        return new MqttClientData(MqttVersion.MQTT_3_1_1, identifier, serverHost, serverPort, serverPath, usesSSL, keyStore, keyStorePassword, trustStore,
+                usesWebSockets, false, false,
                 executorConfig, null);
     }
 }

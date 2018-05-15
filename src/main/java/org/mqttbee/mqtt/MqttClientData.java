@@ -32,10 +32,7 @@ import org.mqttbee.api.mqtt.mqtt5.advanced.Mqtt5AdvancedClientData;
 import org.mqttbee.mqtt.advanced.MqttAdvancedClientData;
 import org.mqttbee.mqtt.datatypes.MqttClientIdentifierImpl;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
+import java.security.*;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -57,6 +54,9 @@ public class MqttClientData implements Mqtt5ClientData {
     private final int serverPort;
     private final String serverPath;
     private final boolean usesSSL;
+    private final KeyStore keyStore;
+    private final String keyStorePassword;
+    private final KeyStore trustStore;
     private final boolean usesWebSockets;
     private final AtomicBoolean connecting;
     private final AtomicBoolean connected;
@@ -70,7 +70,9 @@ public class MqttClientData implements Mqtt5ClientData {
 
     public MqttClientData(
             @NotNull final MqttVersion mqttVersion, @Nullable final MqttClientIdentifierImpl clientIdentifier,
-            @NotNull final String serverHost, final int serverPort, final String serverPath, final boolean usesSSL, final boolean usesWebSockets,
+            @NotNull final String serverHost, final int serverPort, final String serverPath,
+            final boolean usesSSL, @Nullable final KeyStore keyStore, @NotNull String keyStorePassword, @Nullable KeyStore trustStore,
+            final boolean usesWebSockets,
             final boolean followsRedirects, final boolean allowsServerReAuth,
             @NotNull final MqttClientExecutorConfigImpl executorConfig,
             @Nullable final MqttAdvancedClientData advancedClientData) {
@@ -82,6 +84,9 @@ public class MqttClientData implements Mqtt5ClientData {
         // remove any leading slashes
         this.serverPath = serverPath.replaceAll("^/+", "");
         this.usesSSL = usesSSL;
+        this.keyStore = keyStore;
+        this.keyStorePassword = keyStorePassword;
+        this.trustStore = trustStore;
         this.usesWebSockets = usesWebSockets;
         this.connecting = new AtomicBoolean();
         this.connected = new AtomicBoolean();
@@ -132,6 +137,21 @@ public class MqttClientData implements Mqtt5ClientData {
     @Override
     public boolean usesSSL() {
         return usesSSL;
+    }
+
+    @Override
+    public KeyStore getKeyStore() {
+        return keyStore;
+    }
+
+    @Override
+    public String getKeyStorePassword() {
+        return keyStorePassword;
+    }
+
+    @Override
+    public KeyStore getTrustStore() {
+        return trustStore;
     }
 
     @Override
@@ -209,7 +229,7 @@ public class MqttClientData implements Mqtt5ClientData {
     public Optional<MqttClientSslData> getSslData() {
         MqttClientSslData sslData;
         try {
-            sslData = new DefaultMqttClientSslData();
+            sslData = new DefaultMqttClientSslData(keyStore, keyStorePassword, trustStore);
             return Optional.of(sslData);
         } catch (NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException e) {
             e.printStackTrace();

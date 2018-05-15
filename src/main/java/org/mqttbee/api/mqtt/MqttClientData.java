@@ -18,8 +18,10 @@
 package org.mqttbee.api.mqtt;
 
 import org.mqttbee.annotations.NotNull;
+import org.mqttbee.annotations.Nullable;
 import org.mqttbee.api.mqtt.datatypes.MqttClientIdentifier;
 
+import java.security.KeyStore;
 import java.util.Optional;
 
 /**
@@ -38,6 +40,15 @@ public interface MqttClientData {
     String getServerPath();
 
     boolean usesSSL();
+
+    @Nullable
+    KeyStore getKeyStore();
+
+    @NotNull
+    String getKeyStorePassword();
+
+    @Nullable
+    KeyStore getTrustStore();
 
     @NotNull
     MqttClientExecutorConfig getExecutorConfig();

@@ -29,6 +29,8 @@ import org.mqttbee.mqtt.datatypes.MqttClientIdentifierImpl;
 import org.mqttbee.mqtt5.Mqtt5ClientImpl;
 import org.mqttbee.util.MustNotBeImplementedUtil;
 
+import java.security.KeyStore;
+
 /**
  * @author Silvio Giebl
  */
@@ -41,6 +43,9 @@ public class Mqtt5ClientBuilder {
     private final boolean usesSSL;
     private final boolean usesWebSockets;
     private final MqttClientExecutorConfigImpl executorConfig;
+    private final KeyStore keyStore;
+    private final KeyStore trustStore;
+    private final String keyStorePassword;
 
     private boolean followsRedirects = false;
     private boolean allowsServerReAuth = false;
@@ -49,7 +54,8 @@ public class Mqtt5ClientBuilder {
 
     public Mqtt5ClientBuilder(
             @NotNull final MqttClientIdentifierImpl identifier, @NotNull final String serverHost, final int serverPort,
-            final String serverPath, final boolean usesSSL, final boolean usesWebSockets, @NotNull final MqttClientExecutorConfigImpl executorConfig) {
+            final String serverPath, final boolean usesSSL, @Nullable final KeyStore keyStore, @NotNull String keyStorePassword, @Nullable final KeyStore trustStore,
+            final boolean usesWebSockets, @NotNull final MqttClientExecutorConfigImpl executorConfig) {
 
         Preconditions.checkNotNull(identifier);
         Preconditions.checkNotNull(serverHost);
@@ -59,6 +65,9 @@ public class Mqtt5ClientBuilder {
         this.serverPort = serverPort;
         this.serverPath = serverPath;
         this.usesSSL = usesSSL;
+        this.keyStore = keyStore;
+        this.keyStorePassword = keyStorePassword;
+        this.trustStore = trustStore;
         this.usesWebSockets = usesWebSockets;
         this.executorConfig = executorConfig;
     }
@@ -88,7 +97,8 @@ public class Mqtt5ClientBuilder {
     }
 
     private MqttClientData buildClientData() {
-        return new MqttClientData(MqttVersion.MQTT_5_0, identifier, serverHost, serverPort, serverPath, usesSSL, usesWebSockets, followsRedirects,
+        return new MqttClientData(MqttVersion.MQTT_5_0, identifier, serverHost, serverPort, serverPath, usesSSL, keyStore, keyStorePassword, trustStore,
+                usesWebSockets, followsRedirects,
                 allowsServerReAuth, executorConfig, advancedClientData);
     }
 

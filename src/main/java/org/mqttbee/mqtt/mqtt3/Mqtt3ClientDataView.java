@@ -18,6 +18,7 @@
 package org.mqttbee.mqtt.mqtt3;
 
 import org.mqttbee.annotations.NotNull;
+import org.mqttbee.annotations.Nullable;
 import org.mqttbee.api.mqtt.MqttClientExecutorConfig;
 import org.mqttbee.api.mqtt.datatypes.MqttClientIdentifier;
 import org.mqttbee.api.mqtt.mqtt3.Mqtt3ClientConnectionData;
@@ -25,6 +26,7 @@ import org.mqttbee.api.mqtt.mqtt3.Mqtt3ClientData;
 import org.mqttbee.api.mqtt.mqtt3.Mqtt3ServerConnectionData;
 import org.mqttbee.mqtt.MqttClientData;
 
+import java.security.KeyStore;
 import java.util.Optional;
 
 /**
@@ -64,6 +66,17 @@ public class Mqtt3ClientDataView implements Mqtt3ClientData {
     public boolean usesSSL() {
         return wrapped.usesSSL();
     }
+
+    @Nullable
+    @Override
+    public KeyStore getKeyStore() { return wrapped.getKeyStore(); }
+
+    @Override
+    public String getKeyStorePassword() { return wrapped.getKeyStorePassword(); }
+
+    @Nullable
+    @Override
+    public KeyStore getTrustStore() { return wrapped.getTrustStore(); }
 
     @NotNull
     @Override
