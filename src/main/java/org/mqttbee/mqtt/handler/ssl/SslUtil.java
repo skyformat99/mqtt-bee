@@ -64,4 +64,16 @@ public class SslUtil {
 
         return sslContextBuilder.build();
     }
+
+    @NotNull
+    public static SslHandler createSslHandler(
+            final Channel channel, final MqttClientSslData sslData) throws SSLException {
+
+        final SSLEngine sslEngine = createSslEngine(channel, sslData);
+        final SslHandler sslHandler = new SslHandler(sslEngine);
+
+        sslHandler.setHandshakeTimeoutMillis(sslData.handshakeTimeout());
+        return sslHandler;
+    }
+
 }
