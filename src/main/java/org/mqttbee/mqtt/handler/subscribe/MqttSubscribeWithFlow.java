@@ -18,9 +18,9 @@
 package org.mqttbee.mqtt.handler.subscribe;
 
 import org.mqttbee.annotations.NotNull;
+import org.mqttbee.mqtt.handler.publish.MqttSubscriptionFlow;
 import org.mqttbee.mqtt.message.subscribe.MqttSubscribe;
 import org.mqttbee.mqtt.message.subscribe.MqttSubscribeWrapper;
-import org.mqttbee.mqtt.handler.publish.MqttSubscriptionFlow;
 
 /**
  * @author Silvio Giebl

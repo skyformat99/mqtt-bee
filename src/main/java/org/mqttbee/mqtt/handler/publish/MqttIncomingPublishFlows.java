@@ -24,6 +24,7 @@ import org.mqttbee.api.mqtt.mqtt5.message.subscribe.suback.Mqtt5SubAckReasonCode
 import org.mqttbee.api.mqtt.mqtt5.message.unsubscribe.unsuback.Mqtt5UnsubAckReasonCode;
 import org.mqttbee.mqtt.datatypes.MqttTopicFilterImpl;
 import org.mqttbee.mqtt.datatypes.MqttTopicImpl;
+import org.mqttbee.mqtt.ioc.ChannelScope;
 import org.mqttbee.mqtt.message.publish.MqttPublishWrapper;
 import org.mqttbee.mqtt.message.subscribe.MqttSubscribeWrapper;
 import org.mqttbee.mqtt.message.subscribe.MqttSubscription;
@@ -31,7 +32,6 @@ import org.mqttbee.mqtt.message.subscribe.suback.MqttSubAck;
 import org.mqttbee.mqtt.message.unsubscribe.MqttUnsubscribeWrapper;
 import org.mqttbee.mqtt.message.unsubscribe.unsuback.MqttUnsubAck;
 import org.mqttbee.mqtt.message.unsubscribe.unsuback.mqtt3.Mqtt3UnsubAckView;
-import org.mqttbee.mqtt.ioc.ChannelScope;
 import org.mqttbee.util.collections.ScNodeList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
