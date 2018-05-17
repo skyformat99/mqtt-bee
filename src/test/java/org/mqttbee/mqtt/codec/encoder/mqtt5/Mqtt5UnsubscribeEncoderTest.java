@@ -20,7 +20,6 @@ package org.mqttbee.mqtt.codec.encoder.mqtt5;
 import com.google.common.collect.ImmutableList;
 import io.netty.handler.codec.EncoderException;
 import org.junit.jupiter.api.Test;
-import org.mqttbee.mqtt.codec.encoder.AbstractMqtt5EncoderTest;
 import org.mqttbee.mqtt.datatypes.*;
 import org.mqttbee.mqtt.message.unsubscribe.MqttUnsubscribe;
 import org.mqttbee.mqtt.message.unsubscribe.MqttUnsubscribeWrapper;

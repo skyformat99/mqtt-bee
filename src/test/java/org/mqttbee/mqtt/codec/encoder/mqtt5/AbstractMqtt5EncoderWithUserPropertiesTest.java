@@ -18,7 +18,7 @@
 package org.mqttbee.mqtt.codec.encoder.mqtt5;
 
 import com.google.common.collect.ImmutableList;
-import org.mqttbee.mqtt.codec.encoder.AbstractMqtt5EncoderTest;
+import org.mqttbee.mqtt.codec.encoder.AbstractMqttEncoderTest;
 import org.mqttbee.mqtt.datatypes.MqttUTF8StringImpl;
 import org.mqttbee.mqtt.datatypes.MqttUserPropertiesImpl;
 import org.mqttbee.mqtt.datatypes.MqttUserPropertyImpl;

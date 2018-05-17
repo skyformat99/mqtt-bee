@@ -17,40 +17,24 @@
 
 package org.mqttbee.mqtt.codec.encoder.mqtt3;
 
-import io.netty.buffer.ByteBuf;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.junit.jupiter.api.Test;
-import org.mqttbee.mqtt.codec.encoder.AbstractMqtt5EncoderTest;
 import org.mqttbee.mqtt.message.ping.MqttPingReq;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.Assert.assertArrayEquals;
 
-class Mqtt3PingReqEncoderTest extends AbstractMqtt5EncoderTest {
+class Mqtt3PingReqEncoderTest extends AbstractMqtt3EncoderTest {
 
     Mqtt3PingReqEncoderTest() {
         super(true);
     }
 
     @Test
-    void encode() {
-        // Given
-        final MqttPingReq pingRequest = MqttPingReq.INSTANCE;
-        final byte[] expected = {(byte) 0b11000000, 0b0};
+    void encode() throws MqttException {
+        final MqttPingReq beePing = MqttPingReq.INSTANCE;
+        final org.eclipse.paho.client.mqttv3.internal.wire.MqttPingReq pahoPing =
+                new org.eclipse.paho.client.mqttv3.internal.wire.MqttPingReq();
 
-        // When
-        channel.writeOutbound(pingRequest);
-
-        // Then
-        ByteBuf byteBuf = null;
-        try {
-            byteBuf = channel.readOutbound();
-            final byte[] actual = new byte[byteBuf.readableBytes()];
-            byteBuf.readBytes(actual);
-            assertArrayEquals(expected, actual);
-        } finally {
-            if (byteBuf != null) {
-                byteBuf.release();
-            }
-        }
+        assertArrayEquals(bytesOf(pahoPing), bytesOf(beePing));
     }
-
 }
