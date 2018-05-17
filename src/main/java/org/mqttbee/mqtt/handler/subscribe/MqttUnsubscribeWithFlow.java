@@ -20,8 +20,8 @@ package org.mqttbee.mqtt.handler.subscribe;
 import io.reactivex.SingleEmitter;
 import org.mqttbee.annotations.NotNull;
 import org.mqttbee.api.mqtt.mqtt5.message.unsubscribe.unsuback.Mqtt5UnsubAck;
+import org.mqttbee.mqtt.message.unsubscribe.MqttStatefulUnsubscribe;
 import org.mqttbee.mqtt.message.unsubscribe.MqttUnsubscribe;
-import org.mqttbee.mqtt.message.unsubscribe.MqttUnsubscribeWrapper;
 
 /**
  * @author Silvio Giebl
@@ -49,25 +49,25 @@ public class MqttUnsubscribeWithFlow {
     }
 
     @NotNull
-    public MqttUnsubscribeWrapperWithFlow wrap(final int packetIdentifier) {
-        return new MqttUnsubscribeWrapperWithFlow(unsubscribe.wrap(packetIdentifier), flow);
+    public MqttStatefulUnsubscribeWithFlow createStateful(final int packetIdentifier) {
+        return new MqttStatefulUnsubscribeWithFlow(unsubscribe.createStateful(packetIdentifier), flow);
     }
 
 
-    public static class MqttUnsubscribeWrapperWithFlow {
+    public static class MqttStatefulUnsubscribeWithFlow {
 
-        private final MqttUnsubscribeWrapper unsubscribe;
+        private final MqttStatefulUnsubscribe unsubscribe;
         private final SingleEmitter<Mqtt5UnsubAck> flow;
 
-        private MqttUnsubscribeWrapperWithFlow(
-                @NotNull final MqttUnsubscribeWrapper unsubscribe, @NotNull final SingleEmitter<Mqtt5UnsubAck> flow) {
+        private MqttStatefulUnsubscribeWithFlow(
+                @NotNull final MqttStatefulUnsubscribe unsubscribe, @NotNull final SingleEmitter<Mqtt5UnsubAck> flow) {
 
             this.unsubscribe = unsubscribe;
             this.flow = flow;
         }
 
         @NotNull
-        public MqttUnsubscribeWrapper getUnsubscribe() {
+        public MqttStatefulUnsubscribe getUnsubscribe() {
             return unsubscribe;
         }
 

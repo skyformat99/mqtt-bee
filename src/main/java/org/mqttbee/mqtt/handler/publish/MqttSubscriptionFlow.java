@@ -20,7 +20,7 @@ package org.mqttbee.mqtt.handler.publish;
 import org.mqttbee.annotations.NotNull;
 import org.mqttbee.api.mqtt.mqtt5.message.subscribe.Mqtt5SubscribeResult;
 import org.mqttbee.mqtt.datatypes.MqttTopicFilterImpl;
-import org.mqttbee.mqtt.message.subscribe.MqttSubscribeWrapper;
+import org.mqttbee.mqtt.message.subscribe.MqttStatefulSubscribe;
 import org.mqttbee.util.collections.ScNodeList;
 import org.reactivestreams.Subscriber;
 
@@ -30,7 +30,7 @@ import org.reactivestreams.Subscriber;
 public class MqttSubscriptionFlow extends MqttIncomingPublishFlow {
 
     private final ScNodeList<MqttTopicFilterImpl> topicFilters;
-    private int subscriptionIdentifier = MqttSubscribeWrapper.DEFAULT_NO_SUBSCRIPTION_IDENTIFIER;
+    private int subscriptionIdentifier = MqttStatefulSubscribe.DEFAULT_NO_SUBSCRIPTION_IDENTIFIER;
 
     MqttSubscriptionFlow(
             @NotNull final Subscriber<? super Mqtt5SubscribeResult> actual,

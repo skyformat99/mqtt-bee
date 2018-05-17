@@ -19,8 +19,8 @@ package org.mqttbee.mqtt.handler.subscribe;
 
 import org.mqttbee.annotations.NotNull;
 import org.mqttbee.mqtt.handler.publish.MqttSubscriptionFlow;
+import org.mqttbee.mqtt.message.subscribe.MqttStatefulSubscribe;
 import org.mqttbee.mqtt.message.subscribe.MqttSubscribe;
-import org.mqttbee.mqtt.message.subscribe.MqttSubscribeWrapper;
 
 /**
  * @author Silvio Giebl
@@ -46,25 +46,26 @@ public class MqttSubscribeWithFlow {
     }
 
     @NotNull
-    public MqttSubscribeWrapperWithFlow wrap(final int packetIdentifier, final int subscriptionIdentifier) {
-        return new MqttSubscribeWrapperWithFlow(subscribe.wrap(packetIdentifier, subscriptionIdentifier), flow);
+    public MqttStatefulSubscribeWithFlow createStateful(final int packetIdentifier, final int subscriptionIdentifier) {
+        return new MqttStatefulSubscribeWithFlow(
+                subscribe.createStateful(packetIdentifier, subscriptionIdentifier), flow);
     }
 
 
-    public static class MqttSubscribeWrapperWithFlow {
+    public static class MqttStatefulSubscribeWithFlow {
 
-        private final MqttSubscribeWrapper subscribe;
+        private final MqttStatefulSubscribe subscribe;
         private final MqttSubscriptionFlow flow;
 
-        private MqttSubscribeWrapperWithFlow(
-                @NotNull final MqttSubscribeWrapper subscribe, @NotNull final MqttSubscriptionFlow flow) {
+        private MqttStatefulSubscribeWithFlow(
+                @NotNull final MqttStatefulSubscribe subscribe, @NotNull final MqttSubscriptionFlow flow) {
 
             this.subscribe = subscribe;
             this.flow = flow;
         }
 
         @NotNull
-        public MqttSubscribeWrapper getSubscribe() {
+        public MqttStatefulSubscribe getSubscribe() {
             return subscribe;
         }
 
